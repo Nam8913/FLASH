@@ -1,4 +1,4 @@
-public class HTTPRequest
+public class DataTransferObj
 {
     public string type { get; set; } = string.Empty;
     public string path { get; set; } = string.Empty;

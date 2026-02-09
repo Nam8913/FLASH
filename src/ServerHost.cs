@@ -10,9 +10,11 @@ public class ServerHost
     private DateTime _severStartTime;
     private DateTime _lastRequestTime;
 
-    public ServerHost(int port)
+    public ServerHost(FlashConfig config)
     {
-        _port = port;
+        _port = config.port;
+        Settings.Instance.WorkingDirectory = config.workingDirectory;
+
         _listener = new HttpListener();
         _listener.Prefixes.Add($"http://localhost:{_port}/");
     }
@@ -70,7 +72,7 @@ public class ServerHost
         using var reader = new StreamReader(ctx.Request.InputStream);
         var body = reader.ReadToEnd();
 
-        var request = JsonSerializer.Deserialize<HTTPRequest>(body);
+        var request = JsonSerializer.Deserialize<DataTransferObj>(body);
 
         if (request == null)
         {
@@ -79,20 +81,9 @@ public class ServerHost
             return;
         }
 
-        switch (request.type)
+        if (!RequestHandlerDict.TryHandleRequest(request))
         {
-            case "ping":
-                Log("INFO", "Ping from Roblox");
-                break;
-
-            case "sync_script":
-                Log("INFO", $"Sync script → {request.path}");
-                Log("INFO", request.content.Replace("\n", "\\n"));
-                break;
-
-            default:
-                Log("WARN", $"Unknown message: {request.type}");
-                break;
+            Log("ERR", $"No handler for request type: {request.type} from path: {request.path}");
         }
 
         ctx.Response.StatusCode = 200;
