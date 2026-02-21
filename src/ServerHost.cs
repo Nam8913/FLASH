@@ -47,6 +47,7 @@ public class ServerHost
             catch (System.Exception exception)
             {
                 Log("ERR", exception.Message);
+                Log("ERR", exception.StackTrace ?? "No stack trace available.");
                 if(Settings.Instance.AutoExitWhenCatchError)
                 {
                     Log("WARN", "Auto exiting due to error...");
@@ -63,6 +64,9 @@ public class ServerHost
         if (ctx.Request.HttpMethod != "POST")
         {
             ctx.Response.StatusCode = 405;
+            ctx.Response.ContentType = "application/json";
+            using var writer = new StreamWriter(ctx.Response.OutputStream);
+            writer.Write(JsonSerializer.Serialize(new { ok = false, error = "Method Not Allowed" }));
             ctx.Response.Close();
             return;
         }
@@ -84,9 +88,34 @@ public class ServerHost
         if (!RequestHandlerDict.TryHandleRequest(request))
         {
             Log("ERR", $"No handler for request type: {request.type} from path: {request.path}");
+        }else
+        {
+            Log("INFO", $"Handled request type: {request.type} from path: {request.path}");
         }
 
+        object responseBody;
+        if (request.type == "poll")
+        {
+            var messages = ServerCommandQueue.DequeueMany(10);
+            responseBody = new
+            {
+                ok = true,
+                serverUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                messages
+            };
+        }
+        else
+        {
+            responseBody = new { ok = true };
+        }
+
+        var json = JsonSerializer.Serialize(responseBody);
         ctx.Response.StatusCode = 200;
+        ctx.Response.ContentType = "application/json";
+        using (var writer = new StreamWriter(ctx.Response.OutputStream))
+        {
+            writer.Write(json);
+        }
         ctx.Response.Close();
     }
     public static void Log(string level, string msg)
