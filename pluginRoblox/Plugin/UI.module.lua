@@ -31,6 +31,7 @@ function UI.create(plugin, state)
 	background.BackgroundColor3 = Color3.fromRGB(46, 46, 46)
 	background.BorderSizePixel = 0
 	background.Parent = widget
+	
 
 	local layout = Instance.new("UIListLayout")
 	layout.Padding = UDim.new(0, 10)
@@ -110,6 +111,50 @@ function UI.create(plugin, state)
 	statusLabel.TextSize = 16
 	statusLabel.LayoutOrder = 4
 	statusLabel.Parent = background
+	
+	-- Frame chứa riêng 2 nút
+	local buttonRow = Instance.new("Frame")
+	buttonRow.Size = UDim2.new(1, 0, 0, 30)
+	buttonRow.BackgroundTransparency = 1
+	buttonRow.LayoutOrder = 5
+	buttonRow.Parent = background
+
+
+	-- Layout ngang cho frame này
+	local layoutButtonRow = Instance.new("UIListLayout")
+	layoutButtonRow.FillDirection = Enum.FillDirection.Horizontal
+	layoutButtonRow.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layoutButtonRow.VerticalAlignment = Enum.VerticalAlignment.Top
+	layoutButtonRow.Padding = UDim.new(0, 6)
+	layoutButtonRow.Parent = buttonRow
+	
+	for i = 1, 3 do
+		local column = Instance.new("Frame")
+		column.Size = UDim2.new(1/3, -4, 1, 0)
+		column.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+		column.Parent = buttonRow
+
+		-- Layout dọc trong mỗi cột
+		local columnLayout = Instance.new("UIListLayout")
+		columnLayout.FillDirection = Enum.FillDirection.Vertical
+		columnLayout.Padding = UDim.new(0, 6)
+		columnLayout.Parent = column
+
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.new(1, -10, 0, 30)
+		btn.Parent = column
+
+		if i == 1 then
+			btn.Text = "pull code"
+			btn.Name = "PullCode"
+		elseif i == 2 then
+			btn.Text = "push code"
+			btn.Name = "PushCode"
+		elseif i == 3 then
+			btn.Text = "sync_explorer"
+			btn.Name = "SyncExplorer"
+		end
+	end
 
 	local ui = {
 		toolbar = toolbar,
@@ -120,6 +165,9 @@ function UI.create(plugin, state)
 		portInput = portInput,
 		connectBtn = connectBtn,
 		statusLabel = statusLabel,
+		pullBtn = buttonRow:FindFirstChild("PullCode", true),
+		pushBtn = buttonRow:FindFirstChild("PushCode", true),
+		syncExplorerBtn = buttonRow:FindFirstChild("SyncExplorer", true),
 	}
 
 	function ui:updateStatus(status)

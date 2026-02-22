@@ -5,13 +5,14 @@ public static class ServerCommandQueue
     private static readonly ConcurrentQueue<DataTransferObj> Queue = new();
     private static long _nextId = 0;
 
-    public static void Enqueue(string type, string path = "", string content = "")
+    public static void Enqueue(string type, string path = "", string content = "", string objectType = "")
     {
         var msg = new DataTransferObj
         {
             id = Interlocked.Increment(ref _nextId),
             type = type,
             path = path,
+            objectType = objectType,
             content = content
         };
         Queue.Enqueue(msg);

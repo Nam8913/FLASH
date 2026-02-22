@@ -34,9 +34,16 @@ local BASEPART = {
 	"Position",
 	"Orientation",
 }
+local BASESCRIPT = {
+	"Enabled",
+	"RunContext",
+}
 
 local PROPERTY_MAP = {
 	BasePart = BASEPART,
+	ModuleScript = BASESCRIPT,
+	LocalScript = BASESCRIPT,
+	Script = BASESCRIPT,
 	Part = merge(BASEPART, {
 		"CanCollide",
 		"CanTouch",
@@ -62,12 +69,11 @@ local function serializeValue(v)
 		--	return { v:GetComponents() }
 	elseif t == "Color3" then
 		rs = { v.R, v.G, v.B }
-	elseif t == "Material" then
-		rs = v.Name
-	elseif t == "Shape" then
-		rs = v.Name
+	elseif t == "EnumItem" then
+		rs = tostring(v.Name)
 	end
 
+	--print("serializeValue", v, rs, t, typeof(rs), typeof(rs) == "table")
 	return rs;
 end
 

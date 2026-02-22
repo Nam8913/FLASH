@@ -25,7 +25,18 @@ public static class Utils
         rootNode.Children.ForEach(child => WriteNodeToDisk(child, dir.FullName));
     }
 
-    public static void WriteLuaScript(string robloxPath, string source)
+    private static string ScriptKindToExtension(string scriptKind)
+    {
+        return (scriptKind ?? string.Empty).ToLowerInvariant() switch
+        {
+            "server.lua" => ".server.lua",
+            "client.lua" => ".client.lua",
+            "module.lua" => ".module.lua",
+            _ => ".lua"
+        };
+    }
+
+    public static void WriteLuaScript(string robloxPath, string source, string scriptKind)
     {
         if (string.IsNullOrWhiteSpace(robloxPath))
         {
@@ -42,7 +53,11 @@ public static class Utils
             parts = new[] { "UnknownScript" };
         }
 
-        var fileName = parts[^1] + ".lua";
+        var ext = ScriptKindToExtension(scriptKind);
+        var leaf = parts[^1];
+        var fileName = leaf.EndsWith(".lua", StringComparison.OrdinalIgnoreCase)
+            ? leaf
+            : leaf + ext;
         var dirParts = parts.Take(parts.Length - 1).ToArray();
 
         var dir = Settings.Instance.WorkingDirectory;

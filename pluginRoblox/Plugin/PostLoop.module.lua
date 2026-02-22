@@ -12,7 +12,7 @@ function PostLoop.start(state, network, serializer, httpService)
 			local snapshot = serializer.buildSnapshot()
 			local json = httpService:JSONEncode(snapshot)
 			network.postRequest(state, httpService, {
-				type = "sync_script",
+				type = "sync_explorer",
 				path = "ServerScriptService/Main",
 				content = json,
 			})

@@ -13,6 +13,17 @@ local DEFAULT_ROOTS = {
 
 local lastSourceByPath = {}
 
+local function getScriptKind(inst)
+	if inst:IsA("ModuleScript") then
+		return "module.lua"
+	elseif inst:IsA("LocalScript") then
+		return "client.lua"
+	elseif inst:IsA("Script") then
+		return "server.lua"
+	end
+	return "unknown"
+end
+
 local function getRobloxPath(inst)
 	local parts = {}
 	local current = inst
@@ -60,9 +71,11 @@ local function syncInstance(state, network, httpService, inst)
 	end
 
 	lastSourceByPath[path] = src
+	local scriptKind = getScriptKind(inst)
 	network.postRequest(state, httpService, {
 		type = "sync_lua",
 		path = path,
+		objectType = scriptKind,
 		content = src,
 	})
 	return true
